@@ -1,11 +1,11 @@
 #include <iostream>
 #include <chrono>
-#include <iomanip>
+#include <iomanip>          // put_time
 #include <source_location>
 
 // --- DestinationPolicy
 // --- StandardOut
-// --- StandardErr
+// --- StandardCerr
 
 class DestinationPolicy {
 public:
@@ -19,7 +19,7 @@ public:
     }
 };
 
-class StandardErr : public DestinationPolicy {
+class StandardCerr : public DestinationPolicy {
 public:
     std::ostream& getDestination() {
         return std::cerr;
@@ -90,20 +90,22 @@ template <typename Destination, typename Timestamp, typename Details>
 class Logger : public Destination, public Timestamp, public Details {
 private:
     std::ostringstream oss_;
-    void reset_oss() { 
+    void resetOss() { 
         oss_.str("");  
         oss_.clear();
     }
+
 public:
-    template <typename ...Args>    
+    template <typename ...Args>
     void log(Args&& ...args) {
+        
         this->timestamp(oss_);
         (oss_ << ... << std::forward<Args>(args)) << "\n";
         this->getInfo(oss_);
-        oss_ << "\n";
 
-        this->getDestination() << oss_.str();
-        reset_oss();
+        // write info to std::cout or std::cerr
+        this->getDestination() << oss_.str() << "\n";
+        resetOss();
     }
 }; 
 
@@ -113,7 +115,7 @@ int main() {
     Logger<StandardOut, Timestamp, BasicInfo> log1;
     log1.log("Message with timestamp");
 
-    Logger<StandardErr, Timestamp, BasicInfo> log2;
+    Logger<StandardCerr, Timestamp, BasicInfo> log2;
     log2.log("Message on std::cerr with timestamp");
 
     Logger<StandardOut, Timestamp, ExtensiveInfo> log3;
