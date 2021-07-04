@@ -96,8 +96,8 @@ private:
     }
 
 public:
-    template <typename ...Args>
-    void log(Args&& ...args) {
+    template <typename... Args>
+    void log(Args&&... args) {
         
         this->timestamp(oss_);
         (oss_ << ... << std::forward<Args>(args)) << "\n";
